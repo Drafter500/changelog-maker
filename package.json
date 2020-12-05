@@ -1,0 +1,30 @@
+{
+  "name": "changelog-maker",
+  "version": "0.0.1",
+  "description": "Utility to generate changelog text",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint \"**/*.js\"",
+    "test": "mocha -r esm tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Drafter500/changelog-maker.git"
+  },
+  "author": "Vladimir Zemtsov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Drafter500/changelog-maker/issues"
+  },
+  "homepage": "https://github.com/Drafter500/changelog-maker#readme",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "chai": "^4.2.0",
+    "eslint": "^7.2.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "esm": "^3.2.25",
+    "mocha": "^8.2.1",
+    "sinon": "^9.2.1"
+  }
+}
