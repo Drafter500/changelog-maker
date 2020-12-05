@@ -1,2 +1,5 @@
 # changelog-maker
-Simple node.js util to generate changelog 
+
+WIP
+
+This util generates changelog text based on git commits history from the last tag
