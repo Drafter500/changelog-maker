@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint \"**/*.js\"",
-    "test": "mocha -r esm tests.js"
+    "test": "mocha -r esm tests/*.test.js",
+    "test:watch": "mocha -r esm --watch tests/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
     "eslint-plugin-import": "^2.22.1",
     "esm": "^3.2.25",
     "mocha": "^8.2.1",
+    "mock-fs": "^4.13.0",
     "sinon": "^9.2.1"
   }
 }

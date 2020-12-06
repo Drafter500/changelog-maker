@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { generateChangeLogText } from './changelog-maker';
+import { generateChangeLogText } from '../src/changelog-maker';
 
 
 describe('generateChangeLogText', () => {
