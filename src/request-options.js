@@ -1,8 +1,8 @@
-import fs from "fs";
-import path from "path";
+const fs = require("fs");
+const path = require("path");
 
 
-export function getDefaultOptions() {
+function getDefaultRequestOptions() {
   let auth;
   try {
     const authRaw = fs.readFileSync(path.join(process.cwd(), '.git-auth.json'));
@@ -29,3 +29,7 @@ export function getDefaultOptions() {
     },
   };
 }
+
+module.exports = {
+  getDefaultRequestOptions,
+};

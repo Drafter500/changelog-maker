@@ -1,6 +1,8 @@
-import https from 'https';
+const https = require('https');
 
-export async function fetchJson(reqOptions) {
+
+async function fetchJson(reqOptions) {
+  console.log('actual fetch');
   return new Promise((resolve, reject) => {
     const req = https.request(reqOptions, res => {
       let body = '';
@@ -19,3 +21,7 @@ export async function fetchJson(reqOptions) {
     req.end();
   });
 }
+
+module.exports = {
+  fetchJson,
+};

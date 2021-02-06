@@ -1,5 +1,5 @@
-import { expect } from 'chai';
-import { generateChangeLogText } from '../src/changelog-maker';
+const { expect } = require('chai');
+const { generateChangeLogText } = require('./changelog-maker');
 
 
 describe('generateChangeLogText', () => {

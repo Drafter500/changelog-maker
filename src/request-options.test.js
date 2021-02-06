@@ -1,7 +1,7 @@
-import { expect } from 'chai';
-import mockFs from 'mock-fs';
-import { getDefaultOptions } from '../src/request-options';
-import path from "path";
+const { expect } = require('chai');
+const mockFs = require('mock-fs');
+const { getDefaultRequestOptions } = require('./request-options');
+const path = require("path");
 
 
 describe('request-options', () => {
@@ -9,7 +9,7 @@ describe('request-options', () => {
     mockFs.restore();
   });
 
-  describe('getDefaultOptions', () => {
+  describe('getDefaultRequestOptions', () => {
     describe('git auth file present is corrupted', () => {
       beforeEach(() => {
         mockFs({
@@ -18,7 +18,7 @@ describe('request-options', () => {
       });
 
       it('throws', () => {
-        expect(getDefaultOptions)
+        expect(getDefaultRequestOptions)
           .to.throw('.git-auth.json file is missing or not a valid JSON');
       });
     });
@@ -31,7 +31,7 @@ describe('request-options', () => {
       });
 
       it('throws', () => {
-        expect(getDefaultOptions)
+        expect(getDefaultRequestOptions)
           .to.throw('.git-auth.json file must have "user" and "token" values');
       });
     });
@@ -45,7 +45,7 @@ describe('request-options', () => {
       });
 
       it('returns options with auth header', () => {
-        const options = getDefaultOptions();
+        const options = getDefaultRequestOptions();
 
         expect(options).to.deep.equal({
           hostname: 'api.github.com',
