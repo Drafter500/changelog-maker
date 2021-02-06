@@ -1,10 +1,12 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
-const mock = require('mock-require');
+const proxyquire = require('proxyquire');
+
+const execStub = sinon.stub();
 const {
   generateChangeLogText,
   getCurrentRepoOwnerAndName,
-} = require('./changelog-maker');
+} = proxyquire('./changelog-maker', {'child_process': {exec: execStub}});
 
 
 describe('changelog-maker', () => {
@@ -15,13 +17,6 @@ describe('changelog-maker', () => {
   });
 
   describe('getCurrentRepoOwnerAndName', () => {
-    const execStub = sinon.stub();
-    mock('child_process',{exec: execStub});
-
-    beforeEach(() => {
-      execStub.reset();
-    });
-
     it('rejects with error if command fails', async () => {
       execStub.yields('error', null);
 

@@ -2,7 +2,6 @@ const https = require('https');
 
 
 async function fetchJson(reqOptions) {
-  console.log('actual fetch');
   return new Promise((resolve, reject) => {
     const req = https.request(reqOptions, res => {
       let body = '';

@@ -1,6 +1,4 @@
-const { fetchJson } = require('./fetch-json');
-const { getDefaultRequestOptions } = require('./request-options');
-
+const childProcess = require('child_process');
 
 function generateChangeLogText() {
   return 'test';
@@ -10,7 +8,7 @@ async function getCurrentRepoOwnerAndName() {
   return new Promise((resolve, reject) => {
     const getRepoUrlCommand = 'git config --get remote.origin.url';
 
-    require('child_process').exec(getRepoUrlCommand, function(err, stdout) {
+    childProcess.exec(getRepoUrlCommand, function(err, stdout) {
       if (err) {
         reject(err);
       }

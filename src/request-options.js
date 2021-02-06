@@ -5,7 +5,7 @@ const path = require("path");
 function getDefaultRequestOptions() {
   let auth;
   try {
-    const authRaw = fs.readFileSync(path.join(process.cwd(), '.git-auth.json'));
+    const authRaw = fs.readFileSync(path.join(__dirname, '../.git-auth.json'));
     auth = JSON.parse(authRaw);
   } catch {
     throw new Error('.git-auth.json file is missing or not a valid JSON');
