@@ -22,7 +22,25 @@ async function getLatestTagCommitHash(account, repo) {
   }
 }
 
+async function getCommits(account, repo, startDate) {
+  try {
+    const commits = await fetchJson({
+      ...getDefaultRequestOptions(),
+      path: `/repos/${account}/${repo}/commits`,
+    });
+
+    return commits.map(commit => ({
+      sha: commit.sha,
+      message: commit.commit.message,
+    }));
+  } catch(e) {
+    console.error('Failed to fetch commits');
+    throw e;
+  }
+}
+
 
 module.exports = {
   getLatestTagCommitHash,
+  getCommits,
 };
