@@ -4,7 +4,7 @@ const proxyquire = require('proxyquire');
 
 
 const fetchStub = sinon.stub();
-const { getLatestTagCommitHash, getCommits } = proxyquire(
+const { getLatestTagCommitHash, getCommits, getCommitDate } = proxyquire(
   './git-utils',
   {
     './fetch-json': {fetchJson: fetchStub},
@@ -95,11 +95,53 @@ describe('git-utils', () => {
       expect(res).to.deep.equal(expectedResult);
     });
 
+    it('uses "since" param when startDate passed', async () => {
+      const starteDate = '2011-04-14T16:00:49Z';
+      await getCommits('org-one', 'repo-two', starteDate);
+
+      expect(fetchStub.lastCall.firstArg.path)
+        .to.equal('/repos/org-one/repo-two/commits?since=2011-04-14T16:00:49Z');
+    });
+
     it('throws error if request fails', async () => {
       fetchStub.rejects(new Error('failure'));
 
       try {
         await getCommits('org-one', 'repo-two');
+        expect.fail('should have failed');
+      } catch(e) {
+        expect(e.message).to.equal('failure')
+      }
+    });
+  });
+
+  describe('getCommitDate', () => {
+    it('returns commit date', async () => {
+      fetchStub.resolves({
+        'sha': '6dcb09b5b57875f334f61aebed695e2e4193db5e',
+        'commit': {
+          'committer': {
+            'name': 'Monalisa Octocat',
+            'email': 'mona@github.com',
+            'date': '2011-04-14T16:00:49Z'
+          },
+          'message': 'Fix all the bugs',
+        },
+      });
+
+      const res = await getCommitDate(
+        'org-one',
+        'repo-two',
+        '6dcb09b5b57875f334f61aebed695e2e4193db5e',
+      );
+      expect(res).to.equal('2011-04-14T16:00:49Z');
+    });
+
+    it('throws error if request fails', async () => {
+      fetchStub.rejects(new Error('failure'));
+
+      try {
+        await getCommitDate('org-one', 'repo-two', 'hashasf3f');
         expect.fail('should have failed');
       } catch(e) {
         expect(e.message).to.equal('failure')

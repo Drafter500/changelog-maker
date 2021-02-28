@@ -22,11 +22,27 @@ async function getLatestTagCommitHash(account, repo) {
   }
 }
 
+async function getCommitDate(account, repo, commitHash) {
+  try {
+    const commit = await fetchJson({
+      ...getDefaultRequestOptions(),
+      path: `/repos/${account}/${repo}/commits/${commitHash}`,
+    });
+
+    return commit.commit.committer.date;
+  } catch(e) {
+    console.error('Failed to get commit date');
+    throw e;
+  }
+}
+
 async function getCommits(account, repo, startDate) {
   try {
+    const query = startDate ? `?since=${startDate}` : '';
+
     const commits = await fetchJson({
       ...getDefaultRequestOptions(),
-      path: `/repos/${account}/${repo}/commits`,
+      path: `/repos/${account}/${repo}/commits${query}`,
     });
 
     return commits.map(commit => ({
@@ -43,4 +59,5 @@ async function getCommits(account, repo, startDate) {
 module.exports = {
   getLatestTagCommitHash,
   getCommits,
+  getCommitDate,
 };
