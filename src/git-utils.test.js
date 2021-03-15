@@ -4,7 +4,12 @@ const proxyquire = require('proxyquire');
 
 
 const fetchStub = sinon.stub();
-const { getLatestTagCommitHash, getCommits, getCommitDate } = proxyquire(
+const {
+  getLatestTagCommitHash,
+  getCommits,
+  getCommitDate,
+  getMergeCommitsSinceLastTag,
+} = proxyquire(
   './git-utils',
   {
     './fetch-json': {fetchJson: fetchStub},
@@ -202,6 +207,69 @@ describe('git-utils', () => {
       } catch(e) {
         expect(e.message).to.equal('failure')
       }
+    });
+  });
+
+  describe('getMergeCommitsSinceLastTag', () => {
+    beforeEach(() => {
+      // last tag commit
+      fetchStub.onFirstCall().resolves([{commit: {sha: '123'}}]);
+      // commit date
+      fetchStub.onSecondCall().resolves({
+        commit: {
+          committer: {date: '2011-04-14T16:00:49Z'}
+        }
+      });
+      // commits
+      fetchStub.onThirdCall().resolves([
+        {
+          sha: '1111111354t3cr34',
+          commit: {
+            message: 'Bumps version to 1.2.3',
+          },
+        },
+        {
+          sha: '2222222245tc34c',
+          commit: {
+            message: 'Makes everything work',
+          },
+        },
+        {
+          sha: '333333365yb345tc4',
+          commit: {
+            message: 'Merges everything to master (pull request #7)',
+          },
+        },
+        {
+          sha: '444444456y345t345t',
+          commit: {
+            message: 'Improves stuff',
+          },
+        },
+        {
+          sha: '5555555v56yydg4 ',
+          commit: {
+            message: 'Merges origin/stuff-branch (pull request #5)',
+          },
+        },
+        {
+          sha: '6666666m5677v634',
+          commit: {
+            message: 'Starts the work',
+          },
+        },
+      ]);
+    });
+
+    it('returns only "Merges" and "Bump" commits', async () => {
+      const result = await getMergeCommitsSinceLastTag('my-repo', 'my-account');
+
+      const expected = [
+        '- 1111111 Bumps version to 1.2.3',
+        '- 3333333 Merges everything to master (pull request #7)',
+        '- 5555555 Merges origin/stuff-branch (pull request #5)',
+      ];
+      expect(result).to.deep.equal(expected);
     });
   });
 });

@@ -86,13 +86,19 @@ async function getCommits(account, repo, startDate) {
 async function getMergeCommitsSinceLastTag(account, repo) {
   const lastTagHash = await getLatestTagCommitHash(account, repo);
   const lastTagDate =  await getCommitDate(account, repo, lastTagHash);
-  const commits = getCommits(account, repo, lastTagDate);
+  const commits = await getCommits(account, repo, lastTagDate);
 
-  // TODO: filter out commits (leave those starting with Merge, Bump)
+  const filteredCommits = commits.filter(
+    ({ message }) => message.startsWith('Merges') || message.startsWith('Bumps')
+  );
+
+  return filteredCommits
+    .map(commit => `- ${commit.sha.slice(0, 7)} ${commit.message}`);
 }
 
 module.exports = {
   getLatestTagCommitHash,
   getCommits,
   getCommitDate,
+  getMergeCommitsSinceLastTag,
 };
