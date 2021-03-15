@@ -20,4 +20,4 @@ This util generates changelog text based on git commits history from the last ta
 
 The output is just formatted text with the "Merge" and "Bump" commits that happens from the last tag that was created
 
-Disclaimer: I dont bother writing more documentation or supporting various use cases as this is intended to be used just by myself and the tool is configured and works just the way I need it.
+**Disclaimer**: I don't bother writing more documentation or supporting various use cases as this is intended to be used just by myself and the tool is configured and works just the way I need it.
