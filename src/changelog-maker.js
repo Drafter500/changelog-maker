@@ -1,5 +1,5 @@
 const childProcess = require('child_process');
-const { getMergeCommitsSinceLastTag } = require('./git-utils');
+const { getChangeLog } = require('./git-utils');
 
 
 function generateChangeLogText() {
@@ -28,7 +28,7 @@ async function getCurrentRepoOwnerAndName() {
 async function makeChangelog() {
   const [ owner, repo ] = await getCurrentRepoOwnerAndName();
 
-  console.log(await getMergeCommitsSinceLastTag(owner, repo));
+  console.log(await getChangeLog(owner, repo));
 }
 
 

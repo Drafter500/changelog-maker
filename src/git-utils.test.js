@@ -8,7 +8,7 @@ const {
   getLatestTagCommitHash,
   getCommits,
   getCommitDate,
-  getMergeCommitsSinceLastTag,
+  getChangeLog,
 } = proxyquire(
   './git-utils',
   {
@@ -210,7 +210,7 @@ describe('git-utils', () => {
     });
   });
 
-  describe('getMergeCommitsSinceLastTag', () => {
+  describe('getChangeLog', () => {
     beforeEach(() => {
       // last tag commit
       fetchStub.onFirstCall().resolves([{commit: {sha: '123'}}]);
@@ -261,14 +261,43 @@ describe('git-utils', () => {
       ]);
     });
 
-    it('returns only "Merges" and "Bump" commits', async () => {
-      const result = await getMergeCommitsSinceLastTag('my-repo', 'my-account');
+    it('returns "Merges" and "Bump" commits glued', async () => {
+      const result = await getChangeLog('my-repo', 'my-account');
 
-      const expected = [
-        '- 1111111 Bumps version to 1.2.3',
-        '- 3333333 Merges everything to master (pull request #7)',
-        '- 5555555 Merges origin/stuff-branch (pull request #5)',
-      ];
+      const expected = `- 1111111 Bumps version to 1.2.3
+- 3333333 Merges everything to master (pull request #7)
+- 5555555 Merges origin/stuff-branch (pull request #5)`;
+
+      expect(result).to.deep.equal(expected);
+    });
+
+    it('does not include the last matching commit', async () => {
+      fetchStub.onThirdCall().resolves([
+        {
+          sha: '1111111354t3cr34',
+          commit: {
+            message: 'Bumps version to 1.2.3',
+          },
+        },
+        {
+          sha: '333333365yb345tc4',
+          commit: {
+            message: 'Merges everything to master (pull request #7)',
+          },
+        },
+        {
+          sha: '6666666m5677v634',
+          commit: {
+            message: 'Bumps version to 1.2.3-rc',
+          },
+        },
+      ]);
+
+      const result = await getChangeLog('my-repo', 'my-account');
+
+      const expected = `- 1111111 Bumps version to 1.2.3
+- 3333333 Merges everything to master (pull request #7)`;
+
       expect(result).to.deep.equal(expected);
     });
   });
