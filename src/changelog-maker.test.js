@@ -8,7 +8,7 @@ const {
   getCurrentRepoOwnerAndName,
   makeChangelog,
 } = proxyquire('./changelog-maker', {
-  'child_process': {exec: execStub},
+  child_process: {exec: execStub},
   './git-utils': {getChangeLog: getChangeLogStub},
 });
 

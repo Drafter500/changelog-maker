@@ -1,7 +1,7 @@
 const { expect } = require('chai');
+const path = require('path');
 const mockFs = require('mock-fs');
 const { getDefaultRequestOptions } = require('./request-options');
-const path = require("path");
 
 
 describe('request-options', () => {
@@ -13,7 +13,7 @@ describe('request-options', () => {
     describe('git auth file present is corrupted', () => {
       beforeEach(() => {
         mockFs({
-          [path.join(process.cwd(), '.git-auth.json')]: 'not-a-json'
+          [path.join(process.cwd(), '.git-auth.json')]: 'not-a-json',
         });
       });
 
@@ -26,7 +26,7 @@ describe('request-options', () => {
     describe('git auth file present but missing fields', () => {
       beforeEach(() => {
         mockFs({
-          [path.join(process.cwd(), '.git-auth.json')]: '{"foo": "bar"}'
+          [path.join(process.cwd(), '.git-auth.json')]: '{"foo": "bar"}',
         });
       });
 
@@ -40,7 +40,7 @@ describe('request-options', () => {
       beforeEach(() => {
         mockFs({
           [path.join(process.cwd(), '.git-auth.json')]:
-            '{"user": "foo", "token": "123"}'
+            '{"user": "foo", "token": "123"}',
         });
       });
 
@@ -52,7 +52,7 @@ describe('request-options', () => {
           port: 443,
           method: 'GET',
           headers: {
-            'Authorization': `Basic Zm9vOjEyMw==`,
+            Authorization: 'Basic Zm9vOjEyMw==',
             'User-Agent': 'node-js',
           },
         });
@@ -60,5 +60,3 @@ describe('request-options', () => {
     });
   });
 });
-
-

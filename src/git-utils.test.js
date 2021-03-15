@@ -13,7 +13,7 @@ const {
   './git-utils',
   {
     './fetch-json': {fetchJson: fetchStub},
-  }
+  },
 );
 
 const fakeCommit = {
@@ -22,9 +22,9 @@ const fakeCommit = {
   tarball_url: 'tarball',
   commit: {
     sha: 'einzweipolizei',
-    url: 'https://api.github.com/repos/owner-one/repo-two/commits/einzweipolizei'
+    url: 'https://api.github.com/repos/owner-one/repo-two/commits/einzweipolizei',
   },
-  node_id: 'MDM6UmVmMTIzOTMzOTY5OnJlZnMvdGFncy92Mi43LjA='
+  node_id: 'MDM6UmVmMTIzOTMzOTY5OnJlZnMvdGFncy92Mi43LjA=',
 };
 
 describe('git-utils', () => {
@@ -45,8 +45,8 @@ describe('git-utils', () => {
       try {
         await getLatestTagCommitHash('org-one', 'repo-two');
         expect.fail('should have failed');
-      } catch(e) {
-        expect(e.message).to.equal('No tags found.')
+      } catch (e) {
+        expect(e.message).to.equal('No tags found.');
       }
     });
 
@@ -56,8 +56,8 @@ describe('git-utils', () => {
       try {
         await getLatestTagCommitHash('org-one', 'repo-two');
         expect.fail('should have failed');
-      } catch(e) {
-        expect(e.message).to.equal('failure')
+      } catch (e) {
+        expect(e.message).to.equal('failure');
       }
     });
   });
@@ -86,6 +86,15 @@ describe('git-utils', () => {
       ]);
     });
 
+    it('calls endpoint with all params', async () => {
+      await getCommits('org', 'repo', '2011-04-14T16:00:49Z');
+
+      expect(fetchStub).to.have.been.calledOnce;
+      expect(fetchStub.firstCall.firstArg.path)
+        .to.equal('/repos/org/repo/commits'
+        + '?per_page=100&page=0&since=2011-04-14T16%3A00%3A49Z');
+    });
+
     it('returns transformed commits', async () => {
       const expectedResult = [
         {
@@ -102,16 +111,8 @@ describe('git-utils', () => {
         },
       ];
 
-      const res = await getCommits('org-one', 'repo-two');
+      const res = await getCommits('org', 'repo', '2011-04-14T16:00:49Z');
       expect(res).to.deep.equal(expectedResult);
-    });
-
-    it('uses "since" param when startDate passed', async () => {
-      const starteDate = '2011-04-14T16:00:49Z';
-      await getCommits('org-one', 'repo-two', starteDate);
-
-      expect(fetchStub.lastCall.firstArg.path)
-        .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0&since=2011-04-14T16%3A00%3A49Z');
     });
 
     it('throws error if request fails', async () => {
@@ -120,8 +121,8 @@ describe('git-utils', () => {
       try {
         await getCommits('org-one', 'repo-two');
         expect.fail('should have failed');
-      } catch(e) {
-        expect(e.message).to.equal('failure')
+      } catch (e) {
+        expect(e.message).to.equal('failure');
       }
     });
 
@@ -132,13 +133,15 @@ describe('git-utils', () => {
       });
 
       it('makes request to get more commits', async () => {
-        await getCommits('org-one', 'repo-two');
+        await getCommits('org-one', 'repo-two', '2011-04-14T16:00:49Z');
 
         expect(fetchStub).to.have.been.calledTwice;
         expect(fetchStub.firstCall.firstArg.path)
-          .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0');
+          .to.equal('/repos/org-one/repo-two/commits'
+          + '?per_page=100&page=0&since=2011-04-14T16%3A00%3A49Z');
         expect(fetchStub.secondCall.firstArg.path)
-          .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=1');
+          .to.equal('/repos/org-one/repo-two/commits'
+          + '?per_page=100&page=1&since=2011-04-14T16%3A00%3A49Z');
       });
 
       it('returns combined commits', async () => {
@@ -155,15 +158,18 @@ describe('git-utils', () => {
         });
 
         it('makes further request', async () => {
-          await getCommits('org-one', 'repo-two');
+          await getCommits('org-one', 'repo-two', '2011-04-14T16:00:49Z');
 
           expect(fetchStub).to.have.been.calledThrice;
           expect(fetchStub.firstCall.firstArg.path)
-            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0');
+            .to.equal('/repos/org-one/repo-two/commits'
+            + '?per_page=100&page=0&since=2011-04-14T16%3A00%3A49Z');
           expect(fetchStub.secondCall.firstArg.path)
-            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=1');
+            .to.equal('/repos/org-one/repo-two/commits'
+            + '?per_page=100&page=1&since=2011-04-14T16%3A00%3A49Z');
           expect(fetchStub.thirdCall.firstArg.path)
-            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=2');
+            .to.equal('/repos/org-one/repo-two/commits'
+            + '?per_page=100&page=2&since=2011-04-14T16%3A00%3A49Z');
         });
 
         it('returns combined commits', async () => {
@@ -172,21 +178,20 @@ describe('git-utils', () => {
           expect(result).to.have.length(203);
         });
       });
-
     });
   });
 
   describe('getCommitDate', () => {
     it('returns commit date', async () => {
       fetchStub.resolves({
-        'sha': '6dcb09b5b57875f334f61aebed695e2e4193db5e',
-        'commit': {
-          'committer': {
-            'name': 'Monalisa Octocat',
-            'email': 'mona@github.com',
-            'date': '2011-04-14T16:00:49Z'
+        sha: '6dcb09b5b57875f334f61aebed695e2e4193db5e',
+        commit: {
+          committer: {
+            name: 'Monalisa Octocat',
+            email: 'mona@github.com',
+            date: '2011-04-14T16:00:49Z',
           },
-          'message': 'Fix all the bugs',
+          message: 'Fix all the bugs',
         },
       });
 
@@ -204,8 +209,8 @@ describe('git-utils', () => {
       try {
         await getCommitDate('org-one', 'repo-two', 'hashasf3f');
         expect.fail('should have failed');
-      } catch(e) {
-        expect(e.message).to.equal('failure')
+      } catch (e) {
+        expect(e.message).to.equal('failure');
       }
     });
   });
@@ -217,8 +222,8 @@ describe('git-utils', () => {
       // commit date
       fetchStub.onSecondCall().resolves({
         commit: {
-          committer: {date: '2011-04-14T16:00:49Z'}
-        }
+          committer: {date: '2011-04-14T16:00:49Z'},
+        },
       });
       // commits
       fetchStub.onThirdCall().resolves([

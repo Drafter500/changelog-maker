@@ -11,12 +11,13 @@ async function getCurrentRepoOwnerAndName() {
         reject(err);
       }
 
-      let [ owner, repo ] = stdout.split('/').slice(-2);
+      const [ owner, repo ] = stdout.split('/').slice(-2);
+      let repoTrimmed;
       if (repo.endsWith('\n')) {
-        repo = repo.slice(0, -1);
+        repoTrimmed = repo.slice(0, -1);
       }
 
-      resolve([owner, repo]);
+      resolve([owner, repoTrimmed]);
     });
   });
 }

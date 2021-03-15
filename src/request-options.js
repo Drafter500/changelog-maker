@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 
 function getDefaultRequestOptions() {
@@ -24,7 +24,7 @@ function getDefaultRequestOptions() {
     port: 443,
     method: 'GET',
     headers: {
-      'Authorization': `Basic ${authString}`,
+      Authorization: `Basic ${authString}`,
       'User-Agent': 'node-js',
     },
   };
