@@ -1,3 +1,4 @@
+const querystring = require('querystring');
 const { fetchJson } = require('./fetch-json');
 const { getDefaultRequestOptions } = require('./request-options');
 
@@ -37,13 +38,40 @@ async function getCommitDate(account, repo, commitHash) {
 }
 
 async function getCommits(account, repo, startDate) {
-  try {
-    const query = startDate ? `?since=${startDate}` : '';
+  const commitsPerPage = 100;
+  let page = 0;
 
-    const commits = await fetchJson({
-      ...getDefaultRequestOptions(),
-      path: `/repos/${account}/${repo}/commits${query}`,
+  try {
+    const query = querystring.stringify({
+      per_page: commitsPerPage,
+      page,
+      ...(startDate && {since: startDate}), //TODO: remove this check
     });
+
+    let fetchResult = await fetchJson({
+      ...getDefaultRequestOptions(),
+      path: `/repos/${account}/${repo}/commits?${query.toString()}`,
+    });
+
+    let commits = [...fetchResult];
+
+    // Get commits from each next page as long as there is something
+    while (fetchResult.length === commitsPerPage) {
+      page++;
+
+      const newQuery = querystring.stringify({
+        per_page: commitsPerPage,
+        page,
+        ...(startDate && {since: startDate}),
+      });
+
+      fetchResult = await fetchJson({
+        ...getDefaultRequestOptions(),
+        path: `/repos/${account}/${repo}/commits?${newQuery.toString()}`,
+      });
+
+      commits = commits.concat(fetchResult);
+    }
 
     return commits.map(commit => ({
       sha: commit.sha,
@@ -55,6 +83,13 @@ async function getCommits(account, repo, startDate) {
   }
 }
 
+async function getMergeCommitsSinceLastTag(account, repo) {
+  const lastTagHash = await getLatestTagCommitHash(account, repo);
+  const lastTagDate =  await getCommitDate(account, repo, lastTagHash);
+  const commits = getCommits(account, repo, lastTagDate);
+
+  // TODO: filter out commits (leave those starting with Merge, Bump)
+}
 
 module.exports = {
   getLatestTagCommitHash,

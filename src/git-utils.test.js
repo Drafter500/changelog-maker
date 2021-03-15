@@ -11,21 +11,25 @@ const { getLatestTagCommitHash, getCommits, getCommitDate } = proxyquire(
   }
 );
 
+const fakeCommit = {
+  name: 'v3.5.1',
+  zipball_url: 'zipball',
+  tarball_url: 'tarball',
+  commit: {
+    sha: 'einzweipolizei',
+    url: 'https://api.github.com/repos/owner-one/repo-two/commits/einzweipolizei'
+  },
+  node_id: 'MDM6UmVmMTIzOTMzOTY5OnJlZnMvdGFncy92Mi43LjA='
+};
+
 describe('git-utils', () => {
+  beforeEach(() => {
+    fetchStub.reset();
+  });
+
   describe('getLatestTagCommitHash', () => {
     it('returns latest tag commit hash', async () => {
-      fetchStub.resolves([
-        {
-          name: 'v3.5.1',
-          zipball_url: 'zipball',
-          tarball_url: 'tarball',
-          commit: {
-            sha: 'einzweipolizei',
-            url: 'https://api.github.com/repos/owner-one/repo-two/commits/einzweipolizei'
-          },
-          node_id: 'MDM6UmVmMTIzOTMzOTY5OnJlZnMvdGFncy92Mi43LjA='
-        }
-      ]);
+      fetchStub.resolves([fakeCommit]);
       const res = await getLatestTagCommitHash('org-one', 'repo-two');
       expect(res).to.equal('einzweipolizei');
     });
@@ -54,7 +58,7 @@ describe('git-utils', () => {
   });
 
   describe('getCommits', () => {
-    it('returns commits', async () => {
+    beforeEach(() => {
       fetchStub.resolves([
         {
           sha: '1234981249cn9438',
@@ -75,7 +79,9 @@ describe('git-utils', () => {
           },
         },
       ]);
+    });
 
+    it('returns transformed commits', async () => {
       const expectedResult = [
         {
           sha: '1234981249cn9438',
@@ -100,7 +106,7 @@ describe('git-utils', () => {
       await getCommits('org-one', 'repo-two', starteDate);
 
       expect(fetchStub.lastCall.firstArg.path)
-        .to.equal('/repos/org-one/repo-two/commits?since=2011-04-14T16:00:49Z');
+        .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0&since=2011-04-14T16%3A00%3A49Z');
     });
 
     it('throws error if request fails', async () => {
@@ -112,6 +118,56 @@ describe('git-utils', () => {
       } catch(e) {
         expect(e.message).to.equal('failure')
       }
+    });
+
+    describe('results fill the whole page', () => {
+      beforeEach(() => {
+        fetchStub.onFirstCall().resolves(Array(100).fill(fakeCommit));
+        fetchStub.onSecondCall().resolves(Array(3).fill(fakeCommit));
+      });
+
+      it('makes request to get more commits', async () => {
+        await getCommits('org-one', 'repo-two');
+
+        expect(fetchStub).to.have.been.calledTwice;
+        expect(fetchStub.firstCall.firstArg.path)
+          .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0');
+        expect(fetchStub.secondCall.firstArg.path)
+          .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=1');
+      });
+
+      it('returns combined commits', async () => {
+        const result = await getCommits('org-one', 'repo-two');
+
+        expect(result).to.have.length(103);
+      });
+
+      describe('second request has full page', () => {
+        beforeEach(() => {
+          fetchStub.onFirstCall().resolves(Array(100).fill(fakeCommit));
+          fetchStub.onSecondCall().resolves(Array(100).fill(fakeCommit));
+          fetchStub.onThirdCall().resolves(Array(3).fill(fakeCommit));
+        });
+
+        it('makes further request', async () => {
+          await getCommits('org-one', 'repo-two');
+
+          expect(fetchStub).to.have.been.calledThrice;
+          expect(fetchStub.firstCall.firstArg.path)
+            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=0');
+          expect(fetchStub.secondCall.firstArg.path)
+            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=1');
+          expect(fetchStub.thirdCall.firstArg.path)
+            .to.equal('/repos/org-one/repo-two/commits?per_page=100&page=2');
+        });
+
+        it('returns combined commits', async () => {
+          const result = await getCommits('org-one', 'repo-two');
+
+          expect(result).to.have.length(203);
+        });
+      });
+
     });
   });
 
