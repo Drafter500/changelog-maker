@@ -2,15 +2,11 @@ const childProcess = require('child_process');
 const { getChangeLog } = require('./git-utils');
 
 
-function generateChangeLogText() {
-  return 'test';
-}
-
 async function getCurrentRepoOwnerAndName() {
   return new Promise((resolve, reject) => {
     const getRepoUrlCommand = 'git config --get remote.origin.url';
 
-    childProcess.exec(getRepoUrlCommand, function(err, stdout) {
+    childProcess.exec(getRepoUrlCommand, (err, stdout) => {
       if (err) {
         reject(err);
       }
@@ -28,12 +24,11 @@ async function getCurrentRepoOwnerAndName() {
 async function makeChangelog() {
   const [ owner, repo ] = await getCurrentRepoOwnerAndName();
 
-  console.log(await getChangeLog(owner, repo));
+  console.info(await getChangeLog(owner, repo));
 }
 
 
 module.exports = {
-  generateChangeLogText,
   getCurrentRepoOwnerAndName,
-  makeChangelog
+  makeChangelog,
 };
