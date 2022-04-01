@@ -34,6 +34,7 @@ rules:
     - devDependencies: true
   'object-curly-spacing': 'off'
   'object-curly-newline': 'off'
+  prefer-destructuring: 'warn'
 overrides:
   -
     files: '**/*.test.js'

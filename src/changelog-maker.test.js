@@ -39,6 +39,15 @@ describe('changelog-maker', () => {
       const result = await getCurrentRepoOwnerAndName();
       expect(result).to.deep.equal(['owner-one', 'repo-two']);
     });
+
+    describe('when user works through ssh', () => {
+      it('returns owner and repo correctly', async () => {
+        execStub.yields(null, 'git@github.com:owner-one/repo-two.git');
+
+        const result = await getCurrentRepoOwnerAndName();
+        expect(result).to.deep.equal(['owner-one', 'repo-two']);
+      });
+    });
   });
 
   describe('makeChangelog', () => {
